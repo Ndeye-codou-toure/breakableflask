@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Récupérer le code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Scan Trivy des dépendances (requirements.txt)
         run: |
@@ -21,7 +21,7 @@ jobs:
     needs: Dependances
     steps:
       - name: Récupérer le code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Scan Trivy du Dockerfile (mauvaises configurations)
         run: |
@@ -31,8 +31,18 @@ jobs:
             --exit-code 1 \
             /project/Dockerfile
 
-      - name: Vérifier que l'image se construit
+      - name: Build de l'image
         run: docker build -t breakableflask:${{ github.sha }} .
+
+      - name: Scan Trivy de l'image construite
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:latest image \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --exit-code 1 \
+            breakableflask:${{ github.sha }}
 
   Deploy:
     runs-on: ubuntu-latest
