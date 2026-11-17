@@ -1,0 +1,11 @@
+.git
+.gitignore
+Dockerfile*
+*.md
+*.txt
+!requirements.lock
+__pycache__/
+*.pyc
+venv/
+.venv/
+db-data/
