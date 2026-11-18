@@ -17,11 +17,18 @@ RUN python -m venv /opt/venv \
 FROM python:3.13-slim
 
 LABEL org.opencontainers.image.title="breakableflask-secure" \
-      org.opencontainers.image.version="1.3"
+      org.opencontainers.image.version="1.4"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/opt/venv/bin:$PATH"
+
+# Correctifs de sécurité Debian (ex. zlib1g CVE-2026-85091) non encore intégrés à l'image de base
+RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
+ && apt-get install -y --no-install-recommends --only-upgrade zlib1g \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
 # Retire les outils d'installation de l'image de base (pip embarque urllib3, msgpack...)
 # puis crée un utilisateur sans privilèges
